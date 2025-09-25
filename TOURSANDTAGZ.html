@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tours and Tagz Shuttle Services - Reliable transportation in Gqeberha, Eastern Cape. Safe, punctual shuttle services for ESL, hospitality, and nursing professionals.">
+    <title>Tours and Tagz Shuttle Services | Gqeberha, Eastern Cape</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <style>
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #ffffff;
+            --text-color: #000000;
+            --light-bg: #f5f5f5;
+            --white: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            line-height: 1.6;
+            background-color: var(--white);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .header-hidden {
+            transform: translateY(-100%);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            margin-right: 10px;
+            color: var(--secondary-color);
+            font-weight: 900;
+            transform: rotate(-45deg);
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        /* Desktop Navigation */
+        nav {
+            display: flex;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 20px;
+            position: relative;
+        }
+        
+        nav ul li a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0;
+            display: block;
+            position: relative;
+            transition: color 0.3s;
+        }
+        
+        /* Desktop Navigation Hover Effect */
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+        
+        nav ul li a:hover {
+            color: var(--white);
+        }
+        
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+        
+        /* Mobile Menu Button */
+        .mobile-menu {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+        
+        /* Mobile Navigation */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: var(--primary-color);
+            z-index: 200;
+            transition: right 0.4s ease;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .mobile-nav.active {
+            right: 0;
+        }
+        
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mobile-nav-header h2 {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+        }
+        
+        .close-menu {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .close-menu:hover {
+            transform: rotate(90deg);
+        }
+        
+        .mobile-nav ul {
+            flex-direction: column;
+            padding: 1.5rem 0;
+        }
+        
+        .mobile-nav ul li {
+            margin: 0;
+            padding: 0 1.5rem;
+        }
+        
+        .mobile-nav ul li a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 1rem 0;
+            display: block;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: padding-left 0.3s;
+        }
+        
+        .mobile-nav ul li a:hover {
+            padding-left: 0.5rem;
+            color: var(--white);
+        }
+        
+        .mobile-nav ul li:last-child a {
+            border-bottom: none;
+        }
+        
+        /* Overlay for mobile menu */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80');
+            background-size: cover;
+            background-position: center;
+            color: var(--secondary-color);
+            padding: 100px 0;
+            text-align: center;
+            margin-top: 80px;
+        }
+        
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid var(--secondary-color);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* About Us Section */
+        .about {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .about-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .about-content h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+        
+        .about-content p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .highlight {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        /* Services Section */
+        .services {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            color: var(--primary-color);
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .service-card {
+            background-color: var(--white);
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-card i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .featured {
+            position: relative;
+        }
+        
+        .featured::after {
+            content: "★";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+        
+        /* Calculator Section */
+        .calculator {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .calculator-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--primary-color);
+            padding: 40px;
+        }
+        
+        .calculator-container h3 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .calculator-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .input-group label {
+            font-weight: 600;
+            color: var(--primary-color);
+            min-width: 120px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 70px; /* Made the input field smaller */
+        }
+        
+        .calculate-btn {
+            margin-top: 10px;
+            align-self: center;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+            padding: 15px 40px;
+        }
+        
+        .calculate-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .clear-btn {
+            margin-top: 10px;
+            align-self: center;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            padding: 15px 40px;
+            display: none;
+        }
+        
+        .clear-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+        
+        .calculator-result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .calculator-result h4 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .result-details {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        
+        .result-detail {
+            text-align: center;
+        }
+        
+        .result-detail p {
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .result-detail .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .total-cost {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--primary-color);
+        }
+        
+        /* Maps Service Section */
+        .maps-service {
+            padding: 80px 0;
+            background-color: var(--white);
+            display: none;
+        }
+        
+        .maps-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .maps-form {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .maps-form h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--white);
+            color: var(--text-color);
+        }
+        
+        .distance-result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 5px;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: none;
+        }
+        
+        #map {
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .back-btn {
+            margin-top: 20px;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+        
+        .back-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        /* Pricing Section */
+        .pricing {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .pricing-card {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pricing-card h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        .pricing-card p {
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .pricing-card .btn {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .pricing-card .btn:hover {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+        
+        /* Contact Section */
+        .contact {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
+        
+        .contact-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 50px;
+        }
+        
+        .contact-info {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .contact-info h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .contact-item i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-right: 15px;
+            width: 30px;
+        }
+        
+        .contact-item a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .contact-item a:hover {
+            color: var(--primary-color);
+        }
+        
+        .social-links {
+            display: flex;
+            margin-top: 30px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            margin-right: 15px;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-5px);
+        }
+        
+        .contact-form {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .contact-form h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--white);
+            color: var(--text-color);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        footer p {
+            margin-bottom: 20px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            nav {
+                display: none;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .maps-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="container header-container">
+            <div class="logo">
+                <i class="fas fa-location-arrow"></i>
+                <h1>TOURS AND TAGZ SHUTTLE SERVICES</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#calculator">Calculator</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="overlay" id="overlay"></div>
+    <div class="mobile-nav" id="mobile-nav">
+        <div class="mobile-nav-header">
+            <h2>Menu</h2>
+            <div class="close-menu" id="close-menu">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#calculator">Calculator</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h2>Reliable Shuttle Services in Gqeberha</h2>
+            <p>Your trusted transportation partner in the Eastern Cape. We provide safe, comfortable, and affordable shuttle services tailored to your needs.</p>
+            <a href="#contact" class="btn">Book Now</a>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-content">
+                <h2>About Us</h2>
+                <p>Founded in <span class="highlight">2023</span>, Tours and Tagz Shuttle Services has quickly established itself as a premier transportation provider in Gqeberha and the Eastern Cape region.</p>
+                <p>Our business model is centered around providing <span class="highlight">reliable, safe, and punctual</span> shuttle services that our clients can depend on. We specialize in transportation solutions for ESL, hospitality, and nursing professionals, offering both one-time services and convenient monthly subscriptions.</p>
+                <p>At Tours and Tagz, <span class="highlight">safety is our top priority</span>. All our vehicles undergo regular maintenance checks, and our drivers are professionally trained with excellent knowledge of local routes. We understand that being on time is not just a courtesy—it's a commitment we make to every client.</p>
+                <p>We pride ourselves on being your <span class="highlight">trusted partner to get you home safe</span>, every time. Whether you're commuting to work, heading to the airport, or need transportation for a special event, you can count on Tours and Tagz Shuttle Services to deliver exceptional service with your safety and comfort as our primary focus.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Services</h2>
+                <p>We offer a range of shuttle services to meet your transportation needs in and around Gqeberha, Eastern Cape.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card featured">
+                    <i class="fas fa-users"></i>
+                    <h3>Staff Transportation</h3>
+                    <p>Reliable daily transportation for your staff members, ensuring they arrive at work on time, every time.</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-home"></i>
+                    <h3>Door to Door</h3>
+                    <p>Convenient door-to-door shuttle services for your comfort and convenience.</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-city"></i>
+                    <h3>Intercity</h3>
+                    <p>Safe and comfortable intercity transportation between major centers in the Eastern Cape.</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-music"></i>
+                    <h3>Club Staff (Weekend Specials)</h3>
+                    <p>Special weekend transportation services for club staff with flexible timing options.</p>
+                </div>
+                <div class="service-card featured">
+                    <i class="fas fa-plane"></i>
+                    <h3>Airport (Pick Up/Drop Off)</h3>
+                    <p>Reliable airport transfer services to and from Gqeberha and surrounding airports.</p>
+                </div>
+                <div class="service-card" id="maps-service-card">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h3>Maps Service</h3>
+                    <p>Calculate the distance from your location to your destination.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="calculator" id="calculator">
+        <div class="container">
+            <div class="section-title">
+                <h2>Cost Calculator</h2>
+                <p>Calculate the cost of your shuttle service based on distance traveled.</p>
+            </div>
+            <div class="calculator-container">
+                <h3>Calculate Your Trip Cost</h3>
+                <div class="calculator-form">
+                    <div class="input-group">
+                        <label for="distance">Distance (km):</label>
+                        <input type="number" id="distance" placeholder="0" min="0" step="0.1">
+                    </div>
+                    <button id="calculate-cost" class="btn calculate-btn">Calculate Cost</button>
+                    <button id="clear-calculator" class="btn clear-btn">Clear</button>
+                </div>
+                <div id="calculator-result" class="calculator-result">
+                    <h4>Trip Cost Estimate</h4>
+                    <div class="result-details">
+                        <div class="result-detail">
+                            <p>Distance</p>
+                            <div class="value" id="result-distance">0 km</div>
+                        </div>
+                        <div class="result-detail">
+                            <p>Rate</p>
+                            <div class="value">R7/km</div>
+                        </div>
+                    </div>
+                    <div class="total-cost" id="total-cost">R0</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Maps Service Section -->
+    <section class="maps-service" id="maps-service-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Maps Service - Distance Calculator</h2>
+                <p>Calculate the distance from your location to your destination.</p>
+            </div>
+            <div class="maps-container">
+                <div class="maps-form">
+                    <h3>Calculate Distance</h3>
+                    <div class="form-group">
+                        <label for="start-location">Starting Location</label>
+                        <input type="text" id="start-location" placeholder="Enter starting address">
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">Destination</label>
+                        <input type="text" id="destination" placeholder="Enter destination address">
+                    </div>
+                    <button id="calculate-distance" class="btn">Calculate Distance</button>
+                    <button id="back-to-services" class="btn back-btn">Back to Services</button>
+                    <div id="distance-result" class="distance-result"></div>
+                </div>
+                <div id="map"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-title">
+                <h2>Monthly Subscription</h2>
+                <p>Affordable monthly plans for regular shuttle services in Gqeberha and surrounding areas.</p>
+            </div>
+            <div class="pricing-card">
+                <h3>Monthly Shuttle Service</h3>
+                <div class="price">R900<span style="font-size: 1.5rem">/month</span></div>
+                <p>Our monthly subscription service is perfect for professionals who need reliable transportation to and from work on a regular basis.</p>
+                <a href="#contact" class="btn">Subscribe Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contact Us</h2>
+                <p>Get in touch with us for bookings, inquiries, or feedback.</p>
+            </div>
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <a href="tel:0696266734">069 6266 734</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp"></i>
+                        <a href="https://wa.me/27696266734" target="_blank">069 6266 734</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <a href="mailto:simonkyle29@gmail.com">simonkyle29@gmail.com</a>
+                    </div>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/share/1Fcac2qgyE/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/psymonmaponya?igsh=ZGdnNXI0bG84MzVt" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://wa.me/27696266734" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>Send us a Message</h3>
+                    <form id="contact-form">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="service">Service</label>
+                            <select id="service" name="service" required>
+                                <option value="">Select a service</option>
+                                <option value="staff-transportation">Staff Transportation</option>
+                                <option value="door-to-door">Door to Door</option>
+                                <option value="intercity">Intercity</option>
+                                <option value="club-staff">Club Staff (Weekend Specials)</option>
+                                <option value="airport">Airport (Pick Up/Drop Off)</option>
+                                <option value="monthly-subscription">Monthly Subscription</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Tours and Tagz Shuttle Services. All rights reserved.</p>
+            <p>Your trusted partner to get you home safe.</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calculator functionality
+            const calculateBtn = document.getElementById('calculate-cost');
+            const clearBtn = document.getElementById('clear-calculator');
+            const distanceInput = document.getElementById('distance');
+            const calculatorResult = document.getElementById('calculator-result');
+            const resultDistance = document.getElementById('result-distance');
+            const totalCost = document.getElementById('total-cost');
+            
+            calculateBtn.addEventListener('click', function() {
+                const distance = parseFloat(distanceInput.value);
+                
+                if (isNaN(distance) || distance <= 0) {
+                    alert('Please enter a valid distance greater than 0');
+                    return;
+                }
+                
+                // Calculate cost at R7 per km
+                const cost = distance * 7;
+                
+                // Update the result display
+                resultDistance.textContent = distance.toFixed(1) + ' km';
+                totalCost.textContent = 'R' + cost.toFixed(2);
+                
+                // Show the result and clear button
+                calculatorResult.style.display = 'block';
+                clearBtn.style.display = 'inline-block';
+            });
+            
+            clearBtn.addEventListener('click', function() {
+                // Reset the calculator
+                distanceInput.value = '';
+                calculatorResult.style.display = 'none';
+                clearBtn.style.display = 'none';
+            });
+            
+            // Maps service card click
+            const mapsServiceCard = document.getElementById('maps-service-card');
+            const mapsServiceSection = document.getElementById('maps-service-section');
+            const backToServicesBtn = document.getElementById('back-to-services');
+            
+            mapsServiceCard.addEventListener('click', function() {
+                // Hide calculator section and show maps service section
+                document.getElementById('calculator').style.display = 'none';
+                mapsServiceSection.style.display = 'block';
+                
+                // Initialize map if not already initialized
+                if (!window.mapInitialized) {
+                    initializeMap();
+                    window.mapInitialized = true;
+                }
+            });
+            
+            backToServicesBtn.addEventListener('click', function() {
+                // Hide maps service section and show calculator section
+                mapsServiceSection.style.display = 'none';
+                document.getElementById('calculator').style.display = 'block';
+            });
+            
+            // Mobile menu functionality
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const mobileNav = document.getElementById('mobile-nav');
+            const closeMenu = document.getElementById('close-menu');
+            const overlay = document.getElementById('overlay');
+            
+            mobileMenu.addEventListener('click', function() {
+                mobileNav.classList.add('active');
+                overlay.classList.add('active');
+            });
+            
+            closeMenu.addEventListener('click', function() {
+                mobileNav.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            overlay.addEventListener('click', function() {
+                mobileNav.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // Header hide on scroll
+            let lastScrollTop = 0;
+            const header = document.getElementById('header');
+            
+            window.addEventListener('scroll', function() {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    header.classList.add('header-hidden');
+                } else {
+                    header.classList.remove('header-hidden');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    
+                    if (targetSection) {
+                        window.scrollTo({
+                            top: targetSection.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Close mobile menu if open
+                        mobileNav.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Contact form submission
+            const contactForm = document.getElementById('contact-form');
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form data
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const service = document.getElementById('service').value;
+                const message = document.getElementById('message').value;
+                
+                // Construct the mailto link
+                const subject = encodeURIComponent('New Contact Form Submission from Tours and Tagz Website');
+                const body = encodeURIComponent(
+                    `Name: ${name}\n` +
+                    `Email: ${email}\n` +
+                    `Phone: ${phone}\n` +
+                    `Service: ${service}\n\n` +
+                    `Message:\n${message}`
+                );
+                
+                const mailtoLink = `mailto:simonkyle29@gmail.com?subject=${subject}&body=${body}`;
+                
+                // Open the mailto link
+                window.location.href = mailtoLink;
+                
+                // Reset form
+                contactForm.reset();
+            });
+        });
+        
+        // Initialize map function
+        function initializeMap() {
+            // Initialize the map centered on Gqeberha
+            const map = L.map('map').setView([-33.9608, 25.6022], 12);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add geocoder control to the map
+            const geocoder = L.Control.geocoder({
+                defaultMarkGeocode: false,
+                collapsed: true,
+                placeholder: 'Search for a location...'
+            }).addTo(map);
+            
+            // Variables to store markers and route
+            let startMarker = null;
+            let destinationMarker = null;
+            let routeLine = null;
+            
+            // Calculate distance button functionality
+            const calculateDistanceBtn = document.getElementById('calculate-distance');
+            const startLocationInput = document.getElementById('start-location');
+            const destinationInput = document.getElementById('destination');
+            const distanceResult = document.getElementById('distance-result');
+            
+            calculateDistanceBtn.addEventListener('click', function() {
+                const startLocation = startLocationInput.value;
+                const destination = destinationInput.value;
+                
+                if (!startLocation || !destination) {
+                    alert('Please enter both starting location and destination');
+                    return;
+                }
+                
+                // Clear previous markers and route
+                if (startMarker) map.removeLayer(startMarker);
+                if (destinationMarker) map.removeLayer(destinationMarker);
+                if (routeLine) map.removeLayer(routeLine);
+                
+                // Geocode both locations
+                Promise.all([
+                    geocodeLocation(startLocation),
+                    geocodeLocation(destination)
+                ]).then(results => {
+                    const [startCoords, destinationCoords] = results;
+                    
+                    // Add markers to the map
+                    startMarker = L.marker(startCoords).addTo(map)
+                        .bindPopup(`Start: ${startLocation}`)
+                        .openPopup();
+                    
+                    destinationMarker = L.marker(destinationCoords).addTo(map)
+                        .bindPopup(`Destination: ${destination}`);
+                    
+                    // Draw a line between the two points
+                    routeLine = L.polyline([startCoords, destinationCoords], {
+                        color: '#000000',
+                        weight: 4,
+                        opacity: 0.7
+                    }).addTo(map);
+                    
+                    // Calculate distance
+                    const distance = map.distance(startCoords, destinationCoords) / 1000; // Convert to km
+                    
+                    // Display the distance
+                    distanceResult.innerHTML = `<p>Distance: <strong>${distance.toFixed(2)} km</strong></p>`;
+                    distanceResult.style.display = 'block';
+                    
+                    // Update the distance input in the calculator
+                    document.getElementById('distance').value = distance.toFixed(1);
+                    
+                    // Adjust map to show both markers
+                    const group = new L.featureGroup([startMarker, destinationMarker]);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                    
+                }).catch(error => {
+                    console.error('Error geocoding locations:', error);
+                    distanceResult.innerHTML = `<p>Unable to calculate distance. Please check the addresses and try again.</p>`;
+                    distanceResult.style.display = 'block';
+                });
+            });
+            
+            // Function to geocode a location
+            function geocodeLocation(location) {
+                return new Promise((resolve, reject) => {
+                    // Use Nominatim API for geocoding
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.length > 0) {
+                                const result = data[0];
+                                resolve([parseFloat(result.lat), parseFloat(result.lon)]);
+                            } else {
+                                reject(new Error('Location not found'));
+                            }
+                        })
+                        .catch(error => {
+                            reject(error);
+                        });
+                });
+            }
+            
+            // Add event listeners for the input fields to geocode on Enter key
+            startLocationInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    geocodeAndAddMarker(startLocationInput.value, 'start');
+                }
+            });
+            
+            destinationInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    geocodeAndAddMarker(destinationInput.value, 'destination');
+                }
+            });
+            
+            // Function to geocode a location and add a marker
+            function geocodeAndAddMarker(location, type) {
+                if (!location) return;
+                
+                geocodeLocation(location).then(coords => {
+                    if (type === 'start') {
+                        if (startMarker) map.removeLayer(startMarker);
+                        startMarker = L.marker(coords).addTo(map)
+                            .bindPopup(`Start: ${location}`)
+                            .openPopup();
+                    } else {
+                        if (destinationMarker) map.removeLayer(destinationMarker);
+                        destinationMarker = L.marker(coords).addTo(map)
+                            .bindPopup(`Destination: ${location}`)
+                            .openPopup();
+                    }
+                    
+                    // Adjust map view
+                    if (startMarker && destinationMarker) {
+                        const group = new L.featureGroup([startMarker, destinationMarker]);
+                        map.fitBounds(group.getBounds().pad(0.1));
+                    } else {
+                        map.setView(coords, 15);
+                    }
+                }).catch(error => {
+                    console.error('Error geocoding location:', error);
+                    alert('Location not found. Please try a different address.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
